@@ -1,0 +1,8 @@
+*.*proj
+*.ats*
+*.tmp
+*.swp
+
+Release/
+Debug/
+
