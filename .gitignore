@@ -2,6 +2,8 @@
 *.ats*
 *.tmp
 *.swp
+*.dat
+*.log
 
 Release/
 Debug/

@@ -1,18 +1,26 @@
 #!/usr/bin/env python
 from __future__ import print_function
 
+import os
 import serial
 import serial.tools.list_ports
-from time import sleep
+from time import sleep, time
 from math import log10
 
+#some config constants
+LOGFILE = 'log.dat'
+COMPORT = 'COM19'
+SETPOINT = 0.4
+kp = 20
+ki = 1
+DILUTE_PERIOD = 60
 
 class Chamber(object):
   def __init__(self,port_name):
     self._blankval = None
-    
+
     self._init_serial(port_name)
-    
+
   def _init_serial(self,p):
     try:
       self.spt = serial.Serial(port = p,baudrate=19200,timeout = 0.5)
@@ -22,7 +30,7 @@ class Chamber(object):
       for cp in serial.tools.list_ports.comports():
         print(cp[0])
       raise ValueError('invalid port')
-  
+
   def _odbytes2tuple(self,odbytes):
     #correct endianness
     txbytes = odbytes[3::-1]  #first 4bytes
@@ -30,29 +38,29 @@ class Chamber(object):
     tx=int(txbytes.encode('hex'),16)
     rx=int(rxbytes.encode('hex'),16)
     return (tx,rx)
- 
+
   def read_raw(self):
     """
       Read the raw (tx,rx) numbers from chamber.
-      
+
       This function requests tx,rx data from the chamber and decodes it into
-      python int type.  
-      
+      python int type.
+
       Returns (tx,rx) tuple.
-      Returns None on serial timeout.  
+      Returns None on serial timeout.
     """
     return self.dilute(0)
-  
+
   def dilute(self,period):
     """
       Dilute chamber.
-      
+
       period: uint8_t proportional to dilution volume.
       as of right now period = 255 should open the dilution valve for 10 seconds
-      
+
       returns the current raw read value.
     """
-    
+
     if period > 255:
       period = 255
     if period < 0:
@@ -66,20 +74,34 @@ class Chamber(object):
 
   def blank(self):
     self._blankval = self.read_raw()
-  
+
   def read_OD(self):
     od = self.read_raw()
     signal = float(od[1])/float(od[0])
     blank = float(self._blankval[1])/float(self._blankval[0])
     return -log10(signal/blank)
-    
+
 
 if __name__ == '__main__':
-    c = Chamber('COM19')
+    c = Chamber(COMPORT)
     c.blank()
+    z=0;
+    lf = open(LOGFILE,'a')
+    sleep(5)
     while True:
-      sleep(5)
       OD = c.read_OD()
-      print("%0.4f" % OD)
-      c.dilute(15)
-      
+      err = OD-SETPOINT
+      z = z+ki*err
+      z = min(max(0.0,z),255.0) #saturate 0.0-255.0
+      u = int(round(z+err*ki))
+
+
+      logline = '{' + '"time":{:d}, "OD":{:.4f}, "Z":{:.4f}, "U":{:d}'.format(int(time()),OD,z,u) +'}'
+      c.dilute(u)
+
+      print(logline)
+      print(logline,file=lf)
+      #force the file to get written!
+      lf.flush()
+      os.fsync(lf)
+      sleep(DILUTE_PERIOD)
