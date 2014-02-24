@@ -64,8 +64,10 @@ int main(void)
 				print_char(r.bytes[cnt]);
 				cnt++;
 			}
-			close_time = curtime + (((uint16_t)inchar)<<3);
-			PORTD |= 0x01<<4; //open SPV
+			if (inchar>0) {
+				close_time = curtime + ((uint16_t)inchar);
+				PORTD |= 0x01<<4; //open SPV
+			}
 		}
 		if ((close_time-curtime)&0x8000) { //if its after close time
 			PORTD &= ~(0x01<<4); //close SPV

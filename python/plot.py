@@ -7,9 +7,12 @@ t = []
 od = []
 
 for line in logf:
-  temp = json.loads(line)
-  t.append(temp["time"])
-  od.append(temp["OD"])
+  try:
+    temp = json.loads(line)
+    t.append(temp["time"])
+    od.append(temp["OD"])
+  except:
+    print("badline")
 
 tt = map(lambda x: (float(x)-t[0])/60/60,t)
 

@@ -11,8 +11,8 @@ from math import log10
 LOGFILE = 'log.dat'
 COMPORT = 'COM19'
 SETPOINT = 0.4
-kp = 20
-ki = 1
+kp = 100
+ki = 2
 DILUTE_PERIOD = 60
 
 class Chamber(object):
@@ -93,7 +93,7 @@ if __name__ == '__main__':
       err = OD-SETPOINT
       z = z+ki*err
       z = min(max(0.0,z),255.0) #saturate 0.0-255.0
-      u = int(round(z+err*ki))
+      u = int(round(z+err*kp))
 
 
       logline = '{' + '"time":{:d}, "OD":{:.4f}, "Z":{:.4f}, "U":{:d}'.format(int(time()),OD,z,u) +'}'
