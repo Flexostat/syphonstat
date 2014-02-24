@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import os
+import pickle
 import serial
 import serial.tools.list_ports
 from time import sleep, time
@@ -11,8 +12,8 @@ from math import log10
 LOGFILE = 'log.dat'
 COMPORT = 'COM19'
 SETPOINT = 0.4
-kp = 100
-ki = 2
+kp = 150
+ki = 8
 DILUTE_PERIOD = 60
 
 class Chamber(object):
@@ -72,8 +73,14 @@ class Chamber(object):
       return None
     return self._odbytes2tuple(b);
 
-  def blank(self):
-    self._blankval = self.read_raw()
+  def blank(self,blank_tuple=None):
+    if blank_tuple==None:
+      self._blankval = self.read_raw()
+    else:
+      self._blankval = blank_tuple
+      
+  def getblank(self):
+    return self._blankval
 
   def read_OD(self):
     od = self.read_raw()
@@ -83,9 +90,17 @@ class Chamber(object):
 
 
 if __name__ == '__main__':
+    
     c = Chamber(COMPORT)
-    c.blank()
-    z=0;
+    try:
+      with open("state.dat") as f:
+        temp = pickle.load(f)
+      c.blank(temp['blank'])
+      z = temp['z']
+    except IOError:
+      c.blank()
+      z=0
+      
     lf = open(LOGFILE,'a')
     sleep(5)
     while True:
@@ -94,7 +109,8 @@ if __name__ == '__main__':
       z = z+ki*err
       z = min(max(0.0,z),255.0) #saturate 0.0-255.0
       u = int(round(z+err*kp))
-
+      with open("state.dat",'w') as f:
+        pickle.dump({'z': z,'blank':c.getblank()})
 
       logline = '{' + '"time":{:d}, "OD":{:.4f}, "Z":{:.4f}, "U":{:d}'.format(int(time()),OD,z,u) +'}'
       c.dilute(u)
@@ -103,5 +119,5 @@ if __name__ == '__main__':
       print(logline,file=lf)
       #force the file to get written!
       lf.flush()
-      os.fsync(lf)
+      os.fsync(lf.fileno())
       sleep(DILUTE_PERIOD)
