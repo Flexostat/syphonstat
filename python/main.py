@@ -109,8 +109,9 @@ if __name__ == '__main__':
       z = z+ki*err
       z = min(max(0.0,z),255.0) #saturate 0.0-255.0
       u = int(round(z+err*kp))
+      u = min(max(0,u),255) #saturate 0-255
       with open("state.dat",'w') as f:
-        pickle.dump({'z': z,'blank':c.getblank()})
+        pickle.dump({'z': z,'blank':c.getblank()},f)
 
       logline = '{' + '"time":{:d}, "OD":{:.4f}, "Z":{:.4f}, "U":{:d}'.format(int(time()),OD,z,u) +'}'
       c.dilute(u)
