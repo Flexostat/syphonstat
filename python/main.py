@@ -91,34 +91,39 @@ class Chamber(object):
 
 if __name__ == '__main__':
     
-    c = Chamber(COMPORT)
+  c = Chamber(COMPORT)
+  try:
+    with open("state.dat") as f:
+      temp = pickle.load(f)
+    c.blank(temp['blank'])
+    z = temp['z']
+  except IOError:
+    c.blank()
+    z=0
+    
+  lf = open(LOGFILE,'a')
+  sleep(5)
+  while True:
+    OD = c.read_OD()
+    err = OD-SETPOINT
+    z = z+ki*err
+    z = min(max(0.0,z),255.0) #saturate 0.0-255.0
+    u = int(round(z+err*kp))
+    u = min(max(0,u),255) #saturate 0-255
     try:
-      with open("state.dat") as f:
-        temp = pickle.load(f)
-      c.blank(temp['blank'])
-      z = temp['z']
-    except IOError:
-      c.blank()
-      z=0
-      
-    lf = open(LOGFILE,'a')
-    sleep(5)
-    while True:
-      OD = c.read_OD()
-      err = OD-SETPOINT
-      z = z+ki*err
-      z = min(max(0.0,z),255.0) #saturate 0.0-255.0
-      u = int(round(z+err*kp))
-      u = min(max(0,u),255) #saturate 0-255
       with open("state.dat",'w') as f:
         pickle.dump({'z': z,'blank':c.getblank()},f)
+    except KeyboardInterrupt as e:
+      with open("state.dat",'w') as f:
+        pickle.dump({'z': z,'blank':c.getblank()},f)
+      raise e
 
-      logline = '{' + '"time":{:d}, "OD":{:.4f}, "Z":{:.4f}, "U":{:d}'.format(int(time()),OD,z,u) +'}'
-      c.dilute(u)
+    logline = '{' + '"time":{:d}, "OD":{:.4f}, "Z":{:.4f}, "U":{:d}'.format(int(time()),OD,z,u) +'}'
+    c.dilute(u)
 
-      print(logline)
-      print(logline,file=lf)
-      #force the file to get written!
-      lf.flush()
-      os.fsync(lf.fileno())
-      sleep(DILUTE_PERIOD)
+    print(logline)
+    print(logline,file=lf)
+    #force the file to get written!
+    lf.flush()
+    os.fsync(lf.fileno())
+    sleep(DILUTE_PERIOD)
