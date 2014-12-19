@@ -8,13 +8,22 @@ import serial.tools.list_ports
 from time import sleep, time
 from math import log10
 
-#some config constants
-LOGFILE = 'log.dat'
-COMPORT = 'COM19'
-SETPOINT = 0.4
+#########################################################
+#BEGIN: Configuration variables
+#vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+LOGFILE = 'log.dat'   #Name of log file
+COMPORT = 'COM19'     #name of comport
+SETPOINT = 0.4        #OD setpoint
+#Gains: bigger kp means a faster controller but more 
+# cycle-to-cycle variation in dilution volumes
+# hint: keep kp/ki >15
 kp = 150
 ki = 8
-DILUTE_PERIOD = 60
+DILUTE_PERIOD = 60    #how often to dilute in seconds
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#END: Configuration variables
+#########################################################
+
 
 class Chamber(object):
   def __init__(self,port_name):
