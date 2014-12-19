@@ -34,6 +34,7 @@ class Chamber(object):
 
   def _odbytes2tuple(self,odbytes):
     #correct endianness
+    #TODO: replace this with struct.unpack("<ii",data)
     txbytes = odbytes[3::-1]  #first 4bytes
     rxbytes = odbytes[7:3:-1] #next 4bytes
     tx=int(txbytes.encode('hex'),16)
