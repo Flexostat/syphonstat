@@ -12,7 +12,7 @@ from math import log10
 #BEGIN: Configuration variables
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 LOGFILE = 'log.dat'   #Name of log file
-COMPORT = 'COM19'     #name of comport
+COMPORT = 'COM6'     #name of comport
 SETPOINT = 0.4        #OD setpoint
 #Gains: bigger kp means a faster controller but more 
 # cycle-to-cycle variation in dilution volumes
@@ -34,6 +34,7 @@ class Chamber(object):
   def _init_serial(self,p):
     try:
       self.spt = serial.Serial(port = p,baudrate=19200,timeout = 0.5)
+      self.spt.setRTS(True) #close SPV1
     except:
       print("Problem opening serial port")
       print("available serial ports are: ")
@@ -78,9 +79,17 @@ class Chamber(object):
       return
     period = int(round(period))
     self.spt.write(bytearray([period]))
+    #read response
     b=self.spt.read(8)
+
+    #open SPV on syphonstat board
+    self.spt.setRTS(False) #open PV1
+    sleep(period*5.0/1000.0) #this is not very accurate.
+    self.spt.setRTS(True) #close PV1
+
     if len(b)!=8:
       return None
+    print(self._odbytes2tuple(b));
     return self._odbytes2tuple(b);
 
   def blank(self,blank_tuple=None):
@@ -93,10 +102,16 @@ class Chamber(object):
     return self._blankval
 
   def read_OD(self):
-    od = self.read_raw()
-    signal = float(od[1])/float(od[0])
-    blank = float(self._blankval[1])/float(self._blankval[0])
-    return -log10(signal/blank)
+    try:
+      od = self.read_raw()
+      signal = float(od[1])/float(od[0])
+      blank = float(self._blankval[1])/float(self._blankval[0])
+      return -log10(signal/blank)
+    except ZeroDivisionError:
+      print("WARNING! encountered division by zero.  Check" +
+        "your hardware is plugged in and functioning correctly")
+      return 1
+
 
 
 if __name__ == '__main__':
