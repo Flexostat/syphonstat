@@ -20,6 +20,7 @@ SETPOINT = 0.4        #OD setpoint
 kp = 150
 ki = 8
 DILUTE_PERIOD = 60    #how often to dilute in seconds
+USE_CONTROLLER_PV = True
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #END: Configuration variables
 #########################################################
@@ -83,9 +84,10 @@ class Chamber(object):
     b=self.spt.read(8)
 
     #open SPV on syphonstat board
-    self.spt.setRTS(False) #open PV1
-    sleep(period*5.0/1000.0) #this is not very accurate.
-    self.spt.setRTS(True) #close PV1
+    if USE_CONTROLLER_PV:
+      self.spt.setRTS(False) #open PV1
+      sleep(period*5.0/1000.0) #this is not very accurate.
+      self.spt.setRTS(True) #close PV1
 
     if len(b)!=8:
       return None
