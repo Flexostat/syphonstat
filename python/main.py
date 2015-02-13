@@ -13,7 +13,7 @@ from math import log10
 #BEGIN: Configuration variables
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 LOGFILE = 'log.dat'   #Name of log file
-COMPORT = 'COM6'     #name of comport
+COMPORT = 'COM4'     #name of comport
 SETPOINT = 0.4        #OD setpoint
 #Gains: bigger kp means a faster controller but more 
 # cycle-to-cycle variation in dilution volumes
@@ -38,7 +38,7 @@ class Chamber(object):
       self.spt = serial.Serial(port = p,baudrate=19200,timeout = 0.5)
       self.spt.setRTS(True) #close SPV1
     except:
-      print("Problem opening serial port")
+      print("Problem opening serial port " + str(p))
       print("available serial ports are: ")
       for cp in serial.tools.list_ports.comports():
         print(cp[0])
@@ -118,6 +118,7 @@ class Chamber(object):
 
 
 if __name__ == '__main__':
+  test_mode = False
   #process commandline flags
   LOPTS = ["test","port=","setpoint=","logfile="]
   try:
@@ -127,10 +128,7 @@ if __name__ == '__main__':
     sys.exit(0)
   for o,a in opts:
     if o in ("-t","--test"):
-      print("test mode")
-      c = Chamber(COMPORT)
-      print (c.read_raw())
-      sys.exit(0)
+      test_mode = True
     if o == "--port":
       COMPORT = a
     if o == "--setpoint":
@@ -144,6 +142,11 @@ if __name__ == '__main__':
 
     
   c = Chamber(COMPORT)
+  if test_mode:
+    print("test mode:")
+    print (c.read_raw())
+    sys.exit(0)
+  
   try:
     with open("state.dat") as f:
       temp = pickle.load(f)
