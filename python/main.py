@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+"""Usage: main.py [options]
+Options: 
+ -?, --help           Prints this message and exits.
+ -t, --test           Test mode: displays sensor data as (tx,rx) and exits
+     --port=PORT      Sets serial port to PORT.  For windows this should be in 
+                      the form COMnnn eg COM1 or COM123.  For nix/MacOS use the
+                      path to the serial device eg /dev/cu.usbserial
+     --setpoint=f.ff  Sets the OD set point to f.ff OD units.  eg 0.40
+     --logfile=of.dat Sets the file used to wirte out log data.
+
+Example: 
+  Read sensor data to verify the device is working on COM5
+main.py -t --port=COM5
+
+  Run syphoning turbidostat on COM32 at 0.7 OD and write logs to history.dat
+main.py --port=COM32 --setpoint=0.7 --logfile=history.dat
+"""
 from __future__ import print_function
 
 import os
@@ -120,15 +137,19 @@ class Chamber(object):
 if __name__ == '__main__':
   test_mode = False
   #process commandline flags
-  LOPTS = ["test","port=","setpoint=","logfile="]
+  LOPTS = ["test","help","port=","setpoint=","logfile="]
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "t", LOPTS)
+    opts, args = getopt.getopt(sys.argv[1:], "t?", LOPTS)
   except getopt.GetoptError as err:
     print(str(err))
+    print("\n"+__doc__)
     sys.exit(0)
   for o,a in opts:
     if o in ("-t","--test"):
       test_mode = True
+    if o in ("-?","--help"):
+      print(__doc__)
+      sys.exit(0)
     if o == "--port":
       COMPORT = a
     if o == "--setpoint":
@@ -182,3 +203,5 @@ if __name__ == '__main__':
     lf.flush()
     os.fsync(lf.fileno())
     sleep(DILUTE_PERIOD)
+
+
