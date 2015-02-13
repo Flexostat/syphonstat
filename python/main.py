@@ -5,6 +5,7 @@ import os
 import pickle
 import serial
 import serial.tools.list_ports
+import getopt, sys
 from time import sleep, time
 from math import log10
 
@@ -117,6 +118,30 @@ class Chamber(object):
 
 
 if __name__ == '__main__':
+  #process commandline flags
+  LOPTS = ["test","port=","setpoint=","logfile="]
+  try:
+    opts, args = getopt.getopt(sys.argv[1:], "t", LOPTS)
+  except getopt.GetoptError as err:
+    print(str(err))
+    sys.exit(0)
+  for o,a in opts:
+    if o in ("-t","--test"):
+      print("test mode")
+      c = Chamber(COMPORT)
+      print (c.read_raw())
+      sys.exit(0)
+    if o == "--port":
+      COMPORT = a
+    if o == "--setpoint":
+      try:
+        SETPOINT = float(a)
+      except ValueError as err:
+        print("bad argument --setpoint:")
+        print(str(err))
+    if o == "--logfile":
+      LOGFILE = a
+
     
   c = Chamber(COMPORT)
   try:
