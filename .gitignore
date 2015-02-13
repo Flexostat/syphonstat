@@ -4,6 +4,7 @@
 *.swp
 *.dat
 *.log
+test.py
 
 Release/
 Debug/
