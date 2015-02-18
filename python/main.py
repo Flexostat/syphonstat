@@ -136,10 +136,11 @@ class Chamber(object):
 
 if __name__ == '__main__':
   test_mode = False
+  growth_test_mode = False
   #process commandline flags
   LOPTS = ["test","help","port=","setpoint=","logfile="]
   try:
-    opts, args = getopt.getopt(sys.argv[1:], "t?", LOPTS)
+    opts, args = getopt.getopt(sys.argv[1:], "tg?", LOPTS)
   except getopt.GetoptError as err:
     print(str(err))
     print("\n"+__doc__)
@@ -160,6 +161,8 @@ if __name__ == '__main__':
         print(str(err))
     if o == "--logfile":
       LOGFILE = a
+    if o == "g":
+      growth_test_mode = True
 
     
   c = Chamber(COMPORT)
@@ -181,7 +184,11 @@ if __name__ == '__main__':
   sleep(5)
   while True:
     OD = c.read_OD()
-    err = OD-SETPOINT
+    #if in growth test mode change to alt od for 10min every 8 hr
+    if growth_test_mode and time.time()%(8.0*60*60)<(10*60):
+      err = OD-(SETPOINT-0.1)
+    else:
+      err = OD-SETPOINT
     z = z+ki*err
     z = min(max(0.0,z),255.0) #saturate 0.0-255.0
     u = int(round(z+err*kp))
