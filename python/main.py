@@ -35,7 +35,7 @@ SETPOINT = 0.4        #OD setpoint
 #Gains: bigger kp means a faster controller but more 
 # cycle-to-cycle variation in dilution volumes
 # hint: keep kp/ki >15
-kp = 150
+kp = 300
 ki = 8
 DILUTE_PERIOD = 60    #how often to dilute in seconds
 USE_CONTROLLER_PV = True
@@ -161,8 +161,9 @@ if __name__ == '__main__':
         print(str(err))
     if o == "--logfile":
       LOGFILE = a
-    if o == "g":
+    if o == "-g":
       growth_test_mode = True
+      print("GT mode on.")
 
     
   c = Chamber(COMPORT)
@@ -185,7 +186,7 @@ if __name__ == '__main__':
   while True:
     OD = c.read_OD()
     #if in growth test mode change to alt od for 10min every 8 hr
-    if growth_test_mode and time.time()%(8.0*60*60)<(10*60):
+    if growth_test_mode and time()%(8.0*60*60)<(10*60):
       err = OD-(SETPOINT-0.1)
     else:
       err = OD-SETPOINT
