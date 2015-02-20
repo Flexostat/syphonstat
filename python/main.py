@@ -35,8 +35,8 @@ SETPOINT = 0.4        #OD setpoint
 #Gains: bigger kp means a faster controller but more 
 # cycle-to-cycle variation in dilution volumes
 # hint: keep kp/ki >15
-kp = 300
-ki = 8
+kp = 1000
+ki = 25
 DILUTE_PERIOD = 60    #how often to dilute in seconds
 USE_CONTROLLER_PV = True
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
