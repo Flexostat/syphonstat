@@ -183,24 +183,33 @@ if __name__ == '__main__':
     
   lf = open(LOGFILE,'a')
   sleep(5)
+  growth_test = 0
   while True:
     OD = c.read_OD()
-    #if in growth test mode change to alt od for 10min every 8 hr
-    if growth_test_mode and time()%(8.0*60*60)<(10*60):
-      err = OD-(SETPOINT-0.1)
-    else:
+    #if in growth test mode dilute to setpoint -0.1 then grow to setpoint
+    if growth_test_mode and time()%(8.0*60*60)<(2*60):
+      growth_test = -1
+    if growth_test<0:  #dilute down
+      u = 255
+      if OD<SETPOINT-0.1:
+        growth_test=1 #go into grow mode
+    elif growth_test>0:
+      u=0
+      if OD>SETPOINT:
+        growth_test=0
+    else: #normal operation
       err = OD-SETPOINT
-    z = z+ki*err
-    z = min(max(0.0,z),255.0) #saturate 0.0-255.0
-    u = int(round(z+err*kp))
-    u = min(max(0,u),255) #saturate 0-255
-    try:
-      with open("state.dat",'w') as f:
-        pickle.dump({'z': z,'blank':c.getblank()},f)
-    except KeyboardInterrupt as e:
-      with open("state.dat",'w') as f:
-        pickle.dump({'z': z,'blank':c.getblank()},f)
-      raise e
+      z = z+ki*err
+      z = min(max(0.0,z),255.0) #saturate 0.0-255.0
+      u = int(round(z+err*kp))
+      u = min(max(0,u),255) #saturate 0-255
+      try:
+        with open("state.dat",'w') as f:
+          pickle.dump({'z': z,'blank':c.getblank()},f)
+      except KeyboardInterrupt as e:
+        with open("state.dat",'w') as f:
+          pickle.dump({'z': z,'blank':c.getblank()},f)
+        raise e
 
     logline = '{' + '"time":{:d}, "OD":{:.4f}, "Z":{:.4f}, "U":{:d}'.format(int(time()),OD,z,u) +'}'
     c.dilute(u)
