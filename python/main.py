@@ -46,14 +46,34 @@ USE_CONTROLLER_PV = True
 
 class Chamber(object):
   def __init__(self,port_name):
+    #init instance vars
     self._blankval = None
+    self.HW_version = 10 #=v1.0
 
+    #do HW init
     self._init_serial(port_name)
+
+  def close_PV1(self):
+    if self.HW_version<11:
+      self.spt.setRTS(True)
+    else:
+      self.spt.setRTS(False) 
+
+  def open_PV1(self):
+    if self.HW_version<11:
+      self.spt.setRTS(False)
+    else:
+      self.spt.setRTS(True) 
 
   def _init_serial(self,p):
     try:
       self.spt = serial.Serial(port = p,baudrate=19200,timeout = 0.5)
-      self.spt.setRTS(True) #close SPV1
+      if self.spt.getDSR():
+        self.HW_version = 11 #=v1.1
+      else:
+        self.HW_version = 10
+      self.close_PV1()
+
     except:
       print("Problem opening serial port " + str(p))
       print("available serial ports are: ")
@@ -103,9 +123,9 @@ class Chamber(object):
 
     #open SPV on syphonstat board
     if USE_CONTROLLER_PV:
-      self.spt.setRTS(False) #open PV1
+      self.open_PV1()
       sleep(period*5.0/1000.0) #this is not very accurate.
-      self.spt.setRTS(True) #close PV1
+      self.close_PV1()
 
     if len(b)!=8:
       return None
@@ -170,6 +190,7 @@ if __name__ == '__main__':
   if test_mode:
     print("test mode:")
     print (c.read_raw())
+    print(c.spt.getDSR())
     sys.exit(0)
   
   try:
