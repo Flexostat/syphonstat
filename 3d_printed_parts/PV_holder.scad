@@ -1,5 +1,5 @@
 size =50;
-tap_hole_632 = 2.95;
+tap_hole_632 = 2.85; //2.95=tap hole for 6-32.  2.85 = self taping hole for M3
 difference() {
   union() {
     translate([-size/2,-size/2])
@@ -19,6 +19,10 @@ difference() {
   for (ii=[-33/2,33/2]) {
     translate([ii,0,0]) cylinder(h=44,d=tap_hole_632 , center=false,$fn=40);
   }
+  translate([-size/2+8,size/2-6.5,-1])
+  cube([6,3,10]);
+  translate([-size/2+8+6+0.1*25.4,size/2-6.5,-1])
+  cube([6,3,10]);
 }
 
 module v_rounded_cube(xyz,r,$fn=30) {

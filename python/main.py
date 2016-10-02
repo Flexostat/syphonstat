@@ -191,6 +191,9 @@ if __name__ == '__main__':
     print("test mode:")
     print (c.read_raw())
     print(c.spt.getDSR())
+    c.open_PV1()
+    sleep(1)
+    c.close_PV1()
     sys.exit(0)
   
   try:
