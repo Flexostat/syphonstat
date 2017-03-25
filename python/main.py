@@ -30,7 +30,7 @@ from math import log10
 #BEGIN: Configuration variables
 #vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 LOGFILE = 'log.dat'   #Name of log file
-COMPORT = 'COM4'     #name of comport
+COMPORT = 'COM5'     #name of comport
 SETPOINT = 0.4        #OD setpoint
 #Gains: bigger kp means a faster controller but more 
 # cycle-to-cycle variation in dilution volumes
