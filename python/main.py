@@ -190,10 +190,18 @@ if __name__ == '__main__':
   if test_mode:
     print("test mode:")
     print (c.read_raw())
-    print(c.spt.getDSR())
     c.open_PV1()
     sleep(1)
     c.close_PV1()
+    dsr = c.spt.getDSR()
+    cts = c.spt.getCTS()
+    if dsr and not cts:
+      print ("detected v1.1")
+    elif not dsr and not cts:
+      print ("detected v1.0")
+    else:
+      print ("Either not powered or wrong serial port specified")
+
     sys.exit(0)
   
   try:
