@@ -20,6 +20,9 @@ _autosave-*
 *-save.pro
 *-save.kicad_pcb
 
+*.xml
+
+
 Release/
 Debug/
 
