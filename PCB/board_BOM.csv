@@ -1,0 +1,21 @@
+Reference,MPN,qty,note
+JP2,,,3p 0.1in header vertical
+C1,,,.1uF x7r or better 16v or higher
+C2,,,0.01uF x7r or better 16v or higher
+C3,,,.1uF x7r or better 16v or higher
+C4,,,4.7uF x7r or better 16v or higher
+C5,,,4.7uF x7r or better 16v or higher
+C6,,,.1uF x7r or better 16v or higher
+U2,FT232RL,,
+L1,MI0805K400R-10 or similar,,
+PV1,2p 0.1in header vertical,,
+PV2,2p 0.1in header vertical,,
+R1,180ohm 0805,,
+R3 R5,,2,1kohm 0805
+X1,54602-908LF,,
+CON1,PJ-002BH-SMT,,
+"Q3, Q4",CJ2302,,AO3418
+U3,74HCT2G04,,
+P1,ST-USB-009A ,, or   UJ2-BH-1-TH
+U1,R-78E05-0.5,,
+D1,"LED, green, 0805",,
